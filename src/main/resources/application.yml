@@ -1,24 +1,13 @@
 spring:
-
-  data:
-    mongodb:
-      uri: mongodb://root:root@localhost:27017/db-notification?authSource=admin
-
-  kafka:
-    bootstrap-servers: 206.189.159.20:9092
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
   application:
     name: notification-service
+  profiles:
+    active: prod
+  config:
+    import: "configserver:"
+
   cloud:
-    stream:
-      bindings:
-        notificationProcessor-in-0:
-          destination: notifications
-          content-type: application/json
-        notificationProcessor-out-0:
-          destination: processed-notifications
-          content-type: application/json
-server:
-  port: 8888
+    config:
+      uri: http://167.172.78.79:8888
+
+

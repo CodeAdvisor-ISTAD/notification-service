@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 
-@Slf4j
 @Component
 @RequiredArgsConstructor
 public class NotificationConsumer {
@@ -19,10 +18,10 @@ public class NotificationConsumer {
     private final SimpMessagingTemplate messagingTemplate;
     private final NotificationRepository notificationRepository;
 
-    @KafkaListener(topics = "content-events", groupId = "notification-group")
+    @KafkaListener(topics = {"content-events", "forum-events"}, groupId = "notification-group")
     public void consumeNotification(@Payload Notification notification) {
 
-        log.info("Processing notification: {}", notification);
+        notification.setRead(false);
         notification.setCreatedAt(LocalDateTime.now());
 
         // Save notification
