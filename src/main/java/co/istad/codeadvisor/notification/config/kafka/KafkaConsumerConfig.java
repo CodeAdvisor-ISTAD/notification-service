@@ -19,14 +19,22 @@ public class KafkaConsumerConfig {
     @Bean
     public ConsumerFactory<String, Object> consumerFactory() {
         Map<String, Object> config = new HashMap<>();
-        config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "206.189.159.20:9092");
+        config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "167.172.78.79:9092");
         config.put(ConsumerConfig.GROUP_ID_CONFIG, "notification-group");
         config.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, ErrorHandlingDeserializer.class);
         config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ErrorHandlingDeserializer.class);
         config.put(ErrorHandlingDeserializer.KEY_DESERIALIZER_CLASS, StringDeserializer.class);
         config.put(ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS, JsonDeserializer.class);
-        config.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
-        config.put(JsonDeserializer.TYPE_MAPPINGS, "notification:co.istad.codeadvisor.notification.domain.Notification");
+
+//        config.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
+//        config.put(JsonDeserializer.TYPE_MAPPINGS, "notification:co.istad.codeadvisor.notification.domain.Notification, commentCreatedEvent:co.istad.codeadvisor.notification.dto.CommentCreatedEvent, commentRepliedEvent:co.istad.codeadvisor.notification.dto.CommentRepliedEvent, commentReportedEvent:co.istad.codeadvisor.notification.dto.CommentReportedEvent, contentReactedEvent:co.istad.codeadvisor.notification.dto.ContentReactedEvent, contentReportedEvent:co.istad.codeadvisor.notification.dto.ContentReportedEvent");
+//        config.put(JsonDeserializer.VALUE_DEFAULT_TYPE, "co.istad.codeadvisor.notification.domain.Notification");
+
+//        config.put(JsonDeserializer.TRUSTED_PACKAGES, "co.istad.codeadvisor.notification.domain, co.istad.codeadvisor.notification.dto");
+//        config.put(JsonDeserializer.TYPE_MAPPINGS, "notification:co.istad.codeadvisor.notification.domain.Notification, commentCreatedEvent:co.istad.codeadvisor.notification.dto.CommentCreatedEvent");
+//        config.put(JsonDeserializer.VALUE_DEFAULT_TYPE, "co.istad.codeadvisor.notification.domain.Notification");
+
+        config.put(JsonDeserializer.TRUSTED_PACKAGES, "co.istad.codeadvisor.notification.domain, co.istad.codeadvisor.notification.dto");
         config.put(JsonDeserializer.VALUE_DEFAULT_TYPE, "co.istad.codeadvisor.notification.domain.Notification");
 
         return new DefaultKafkaConsumerFactory<>(config, new ErrorHandlingDeserializer<>(new StringDeserializer()), new ErrorHandlingDeserializer<>(new JsonDeserializer<>(new ObjectMapper())));

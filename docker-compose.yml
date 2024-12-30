@@ -1,16 +1,19 @@
-version: '3.9'
-
+# Schema registry service
 services:
-  notification-service:
-    container_name: notification-service
-    build:
-      context: . # Use the current directory for building
+  schema-registry:
+    image: confluentinc/cp-schema-registry:7.4.6
+    hostname: schema-registry
+    container_name: schema_registry_container
     ports:
-      - "8084:8084" # Map the application port
-    #    environment:
-    #      SPRING_PROFILES_ACTIVE: prod # Set Spring profile if needed
+      - '8998:8081'
+    environment:
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://167.172.78.79:9092,PLAINTEXT://167.172.78.79:9093,PLAINTEXT://167.172.78.79:9094
+      SCHEMA_REGISTRY_LISTENERS: http://schema-registry:8081
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+      SCHEMA_REGISTRY_KAFKASTORE_TOPIC_REPLICATION_FACTOR: 3
+      SCHEMA_REGISTRY_KAFKASTORE_TOPIC: _schemas
+      SCHEMA_REGISTRY_GROUP_ID: schema-registry-cluster
+      SCHEMA_REGISTRY_MASTER_ELIGIBLITY: "true"
+      SCHEMA_REGISTRY_KAFKASTORE_SECURITY_PROTOCOL: PLAINTEXT
     volumes:
-      - logs:/app/logs # Optional: Map logs to a local directory
-
-volumes:
-  logs:
+      - schema-registry-data:/var/lib/schema-registry/data

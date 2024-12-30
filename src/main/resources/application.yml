@@ -10,4 +10,9 @@ spring:
     config:
       uri: http://167.172.78.79:8888
 
+comment-created-events-topic: comment-created-events-topic
+comment-replied-events-topic: comment-replied-events-topic
+comment-reported-events-topic: comment-reported-events-topic
+content-reacted-events-topic: content-reacted-events-topic
+content-reported-events-topic: content-reported-events-topic
 
