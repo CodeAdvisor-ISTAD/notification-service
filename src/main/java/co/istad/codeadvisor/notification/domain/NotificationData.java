@@ -1,13 +1,10 @@
 package co.istad.codeadvisor.notification.domain;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
-@NoArgsConstructor
+@Builder
 public class NotificationData {
     private String uuid;
     private String slug;

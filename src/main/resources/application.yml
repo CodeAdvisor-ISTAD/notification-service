@@ -6,13 +6,58 @@ spring:
   config:
     import: "configserver:"
 
+  kafka:
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: io.confluent.kafka.serializers.KafkaAvroDeserializer
+      properties:
+        schema:
+          registry:
+            url: http://206.189.159.20:8998
+            request:
+              timeout:
+                ms: 5000
+            connection:
+              timeout:
+                ms: 5000
+
+    consumer:
+      group-id: notification-group
+      auto-offset-reset: earliest
+      key-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      properties:
+        spring:
+          deserializer:
+            key:
+              delegate: org.apache.kafka.common.serialization.StringDeserializer
+            value:
+              delegate: io.confluent.kafka.serializers.KafkaAvroDeserializer
+
+    properties:
+      schema:
+        registry:
+          url: http://206.189.159.20:8998
+          request:
+            timeout:
+              ms: 5000
+          connection:
+            timeout:
+              ms: 5000
+      specific:
+        avro:
+          reader: true
+
+    listener:
+      missing-topics-fatal: false
+
+
   cloud:
     config:
       uri: http://167.172.78.79:8888
 
-comment-created-events-topic: comment-created-events-topic
-comment-replied-events-topic: comment-replied-events-topic
-comment-reported-events-topic: comment-reported-events-topic
-content-reacted-events-topic: content-reacted-events-topic
-content-reported-events-topic: content-reported-events-topic
-
+#comment-created-events-topic: comment-created-events-topic
+#comment-replied-events-topic: comment-replied-events-topic
+#comment-reported-events-topic: comment-reported-events-topic
+#content-reacted-events-topic: content-reacted-events-topic
+#content-reported-events-topic: content-reported-events-topic

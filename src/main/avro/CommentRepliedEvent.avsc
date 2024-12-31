@@ -1,0 +1,11 @@
+{
+  "namespace": "co.istad.codeadvisor.notification.domain",
+  "type": "record",
+  "name": "CommentRepliedEvent",
+  "fields": [
+    { "name": "contentId", "type": "string" },
+    { "name": "type", "type": "string" },
+    { "name": "commentId", "type": "string" },
+    { "name": "userId", "type": "string" }
+  ]
+}
