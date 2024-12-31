@@ -11,101 +11,114 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaHandler;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.support.KafkaHeaders;
+import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
-//@KafkaListener(topics={
-////        "${comment-created-events-topic}",
-////        "${comment-replied-events-topic}",
-////        "${comment-reported-events-topic}",
-////        "${content-reacted-events-topic}",
-////        "${content-reported-events-topic}",
-////        "content-events",
-//        "comment-created-events-topic",
-//})
 public class NotificationConsumer {
 
-        private final ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
+    private final NotificationRepository notificationRepository;
+    private final SimpMessagingTemplate simpMessagingTemplate;
 
-        @KafkaListener(topics = "comment-created-events-topic", groupId = "notification-group")
-        public void consumeCommentCreated(@Payload String message) {
-            try {
-                CommentCreatedEvent event = objectMapper.readValue(message, CommentCreatedEvent.class);
-                handleCommentCreated(event);
-            } catch (JsonProcessingException e) {
-                log.error("Error processing CommentCreatedEvent: {}", message, e);
-                throw new RuntimeException("Message processing failed", e);
+
+    @KafkaListener(topics = {
+            "${kafka.topic.comment-created}",
+            "${kafka.topic.comment-replied}",
+            "${kafka.topic.comment-reported}",
+            "${kafka.topic.content-reacted}",
+            "${kafka.topic.content-reported}",
+            "${kafka.topic.content-created}",
+            "${kafka.topic.question-created}",
+            "${kafka.topic.question-voted}",
+            "${kafka.topic.answer-created}",
+            "${kafka.topic.answer-replied}",
+            "${kafka.topic.answer-voted}",
+            "${kafka.topic.answer-accepted}"
+    }, groupId = "notification-group")
+    public void handleMessage(@Payload String message,
+                              @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
+        try {
+            switch (topic) {
+                case "comment-created-events-topic" -> {
+                    CommentCreatedEvent event = objectMapper.readValue(message, CommentCreatedEvent.class);
+                    handleCommentCreated(event);
+                }
+                case "comment-replied-events-topic" -> {
+                    CommentRepliedEvent event = objectMapper.readValue(message, CommentRepliedEvent.class);
+                    handleCommentReplied(event);
+                }
+                case "content-reacted-events-topic" -> {
+                    ContentReactedEvent event = objectMapper.readValue(message, ContentReactedEvent.class);
+                    handleContentReacted(event);
+                }
+                default -> log.warn("Unknown topic: {}", topic);
             }
-        }
-
-        @KafkaListener(topics = "comment-replied-events-topic", groupId = "notification-group")
-        public void consumeCommentReplied(String message) {
-            try {
-                CommentRepliedEvent event = objectMapper.readValue(message, CommentRepliedEvent.class);
-                handleCommentReplied(event);
-            } catch (JsonProcessingException e) {
-                log.error("Error deserializing CommentRepliedEvent", e);
-            }
-        }
-
-        @KafkaListener(topics = "comment-reported")
-        public void consumeCommentReported(String message) {
-            try {
-                CommentReportedEvent event = objectMapper.readValue(message, CommentReportedEvent.class);
-                handleCommentReported(event);
-            } catch (JsonProcessingException e) {
-                log.error("Error deserializing CommentReportedEvent", e);
-            }
-        }
-
-        @KafkaListener(topics = "content-reacted")
-        public void consumeContentReacted(String message) {
-            try {
-                ContentReactedEvent event = objectMapper.readValue(message, ContentReactedEvent.class);
-                handleContentReacted(event);
-            } catch (JsonProcessingException e) {
-                log.error("Error deserializing ContentReactedEvent", e);
-            }
-        }
-
-        @KafkaListener(topics = "content-reported")
-        public void consumeContentReported(String message) {
-            try {
-                ContentReportedEvent event = objectMapper.readValue(message, ContentReportedEvent.class);
-                handleContentReported(event);
-            } catch (JsonProcessingException e) {
-                log.error("Error deserializing ContentReportedEvent", e);
-            }
-        }
-
-        private void handleCommentCreated(CommentCreatedEvent event) {
-            log.info("Received CommentCreatedEvent: {}", event);
-            // Add your business logic here
-        }
-
-        private void handleCommentReplied(CommentRepliedEvent event) {
-            log.info("Received CommentRepliedEvent: {}", event);
-            // Add your business logic here
-        }
-
-        private void handleCommentReported(CommentReportedEvent event) {
-            log.info("Received CommentReportedEvent: {}", event);
-            // Add your business logic here
-        }
-
-        private void handleContentReacted(ContentReactedEvent event) {
-            log.info("Received ContentReactedEvent: {}", event);
-            // Add your business logic here
-        }
-
-        private void handleContentReported(ContentReportedEvent event) {
-            log.info("Received ContentReportedEvent: {}", event);
-            // Add your business logic here
+        } catch (JsonProcessingException e) {
+            log.error("Error processing message from topic {}: {}", topic, message, e);
+            throw new RuntimeException("Message processing failed", e);
         }
     }
+
+    private void handleCommentCreated(CommentCreatedEvent event) {
+        Notification notification = buildNotification(
+                event.getUserId(),
+                event.getBody(),
+                NotificationType.COMMENT,
+                event.getContentId()
+        );
+        saveAndSendNotification(notification);
+    }
+
+    private void handleCommentReplied(CommentRepliedEvent event) {
+        Notification notification = buildNotification(
+                event.getUserId(),
+                "Replied to your comment",
+                NotificationType.REPLY,
+                event.getContentId()
+        );
+        saveAndSendNotification(notification);
+    }
+
+    private void handleContentReacted(ContentReactedEvent event) {
+        Notification notification = buildNotification(
+                event.getUserId(),
+                "Reacted with " + event.getReactionType(),
+                NotificationType.LIKE,
+                event.getContentId()
+        );
+        saveAndSendNotification(notification);
+    }
+
+    private Notification buildNotification(String senderId, String message,
+                                           NotificationType type, String contentId) {
+        NotificationData notificationData = new NotificationData();
+        notificationData.setUuid(contentId);
+
+        return Notification.builder()
+                .senderId(senderId)
+                .message(message)
+                .notificationType(type)
+                .notificationData(notificationData)
+                .isRead(false)
+                .createdAt(LocalDateTime.now())
+                .build();
+    }
+
+    private void saveAndSendNotification(Notification notification) {
+        notification = notificationRepository.save(notification);
+        simpMessagingTemplate.convertAndSend(
+                "/topic/notifications/" + notification.getReceiverId(),
+                notification
+        );
+        log.info("Notification saved and sent: {}", notification);
+    }
+}

@@ -10,9 +10,20 @@ spring:
     config:
       uri: http://167.172.78.79:8888
 
-comment-created-events-topic: comment-created-events-topic
-comment-replied-events-topic: comment-replied-events-topic
-comment-reported-events-topic: comment-reported-events-topic
-content-reacted-events-topic: content-reacted-events-topic
-content-reported-events-topic: content-reported-events-topic
+kafka:
+  topic:
+    comment-created: comment-created-events-topic
+    comment-replied: comment-replied-events-topic
+    comment-reported: comment-reported-events-topic
+
+    content-reacted: content-reacted-events-topic
+    content-reported: content-reported-events-topic
+    content-created: content-created-events-topic
+
+    question-created: question-created-events-topic
+    question-voted: question-voted-events-topic
+    answer-created: answer-created-events-topic
+    answer-replied: answer-replied-events-topic
+    answer-voted: answer-voted-events-topic
+    answer-accepted: answer-accepted-events-topic
 
