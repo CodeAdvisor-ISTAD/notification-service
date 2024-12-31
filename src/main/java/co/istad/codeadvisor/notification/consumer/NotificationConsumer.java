@@ -9,7 +9,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.kafka.annotation.KafkaHandler;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
@@ -18,8 +17,6 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-
-
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -28,7 +25,6 @@ public class NotificationConsumer {
     private final ObjectMapper objectMapper;
     private final NotificationRepository notificationRepository;
     private final SimpMessagingTemplate simpMessagingTemplate;
-
 
     @KafkaListener(topics = {
             "${kafka.topic.comment-created}",
@@ -59,6 +55,34 @@ public class NotificationConsumer {
                 case "content-reacted-events-topic" -> {
                     ContentReactedEvent event = objectMapper.readValue(message, ContentReactedEvent.class);
                     handleContentReacted(event);
+                }
+                case "content-reported-events-topic" -> {
+                    ContentReportedEvent event = objectMapper.readValue(message, ContentReportedEvent.class);
+                    handleContentReported(event);
+                }
+                case "question-created-events-topic" -> {
+                    QuestionCreatedEvent event = objectMapper.readValue(message, QuestionCreatedEvent.class);
+                    handleQuestionCreated(event);
+                }
+                case "question-voted-events-topic" -> {
+                    QuestionVotedEvent event = objectMapper.readValue(message, QuestionVotedEvent.class);
+                    handleQuestionVoted(event);
+                }
+                case "answer-created-events-topic" -> {
+                    AnswerCreatedEvent event = objectMapper.readValue(message, AnswerCreatedEvent.class);
+                    handleAnswerCreated(event);
+                }
+                case "answer-replied-events-topic" -> {
+                    AnswerRepliedEvent event = objectMapper.readValue(message, AnswerRepliedEvent.class);
+                    handleAnswerReplied(event);
+                }
+                case "answer-voted-events-topic" -> {
+                    AnswerVotedEvent event = objectMapper.readValue(message, AnswerVotedEvent.class);
+                    handleAnswerVoted(event);
+                }
+                case "answer-accepted-events-topic" -> {
+                    AnswerAcceptedEvent event = objectMapper.readValue(message, AnswerAcceptedEvent.class);
+                    handleAnswerAccepted(event);
                 }
                 default -> log.warn("Unknown topic: {}", topic);
             }
@@ -93,6 +117,76 @@ public class NotificationConsumer {
                 event.getUserId(),
                 "Reacted with " + event.getReactionType(),
                 NotificationType.LIKE,
+                event.getContentId()
+        );
+        saveAndSendNotification(notification);
+    }
+
+    private void handleContentReported(ContentReportedEvent event) {
+        Notification notification = buildNotification(
+                event.getUserId(),
+                "Reported your content",
+                NotificationType.REPORT,
+                event.getContentId()
+        );
+        saveAndSendNotification(notification);
+    }
+
+    private void handleQuestionCreated(QuestionCreatedEvent event) {
+        Notification notification = buildNotification(
+                event.getUserId(),
+                "Created a new question",
+                NotificationType.QUESTION,
+                event.getContentId()
+        );
+        saveAndSendNotification(notification);
+    }
+
+    private void handleQuestionVoted(QuestionVotedEvent event) {
+        Notification notification = buildNotification(
+                event.getUserId(),
+                "Voted on your question",
+                NotificationType.VOTE,
+                event.getContentId()
+        );
+        saveAndSendNotification(notification);
+    }
+
+    private void handleAnswerCreated(AnswerCreatedEvent event) {
+        Notification notification = buildNotification(
+                event.getUserId(),
+                "Created a new answer",
+                NotificationType.ANSWER,
+                event.getContentId()
+        );
+        saveAndSendNotification(notification);
+    }
+
+    private void handleAnswerReplied(AnswerRepliedEvent event) {
+        Notification notification = buildNotification(
+                event.getUserId(),
+                "Replied to your answer",
+                NotificationType.REPLY,
+                event.getContentId()
+        );
+        saveAndSendNotification(notification);
+    }
+
+    private void handleAnswerVoted(AnswerVotedEvent event) {
+        Notification notification = buildNotification(
+                event.getUserId(),
+                "Voted on your answer",
+                NotificationType.VOTE,
+                event.getContentId()
+        );
+        saveAndSendNotification(notification);
+    }
+
+    private void handleAnswerAccepted(AnswerAcceptedEvent event) {
+        Notification notification = buildNotification(
+                event.getUserId(),
+                "Accepted your answer",
+                NotificationType.ACCEPT,
                 event.getContentId()
         );
         saveAndSendNotification(notification);
