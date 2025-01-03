@@ -285,7 +285,7 @@ public class NotificationConsumer {
      */
     private void saveAndSendNotification(Notification notification) {
         notification = notificationRepository.save(notification);
-        notification.setReceiverId("receiver");
+        notification.setReceiverId("receiverId");
         simpMessagingTemplate.convertAndSend(
                 "/topic/notifications/" + notification.getReceiverId(),
                 notification
