@@ -1,7 +1,7 @@
-package co.istad.codeadvisor.notification.controller;
+package co.istad.codeadvisor.notification.feature.notification.web;
 
 import co.istad.codeadvisor.notification.domain.Notification;
-import co.istad.codeadvisor.notification.service.NotificationService;
+import co.istad.codeadvisor.notification.feature.notification.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 

@@ -1,4 +1,4 @@
-package co.istad.codeadvisor.notification.dto;
+package co.istad.codeadvisor.notification.feature.notification.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -12,4 +12,5 @@ public class ContentReactedEvent {
     String type;
     String userId;
     String reactionType;
+    String oldReactionType;
 }

@@ -1,4 +1,4 @@
-package co.istad.codeadvisor.notification.dto;
+package co.istad.codeadvisor.notification.feature.notification.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,7 +9,7 @@ import lombok.ToString;
 @Setter
 @AllArgsConstructor
 @ToString
-public class ContentCreatedEvent {
+public class AnswerCreatedEvent {
     String userId;
     String type;
     String contentId;

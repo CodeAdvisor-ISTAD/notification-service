@@ -1,10 +1,10 @@
-package co.istad.codeadvisor.notification.consumer;
+package co.istad.codeadvisor.notification.feature.notification.consumer;
 
 import co.istad.codeadvisor.notification.domain.Notification;
 import co.istad.codeadvisor.notification.domain.NotificationData;
 import co.istad.codeadvisor.notification.domain.NotificationType;
-import co.istad.codeadvisor.notification.dto.*;
-import co.istad.codeadvisor.notification.repository.NotificationRepository;
+import co.istad.codeadvisor.notification.feature.notification.dto.*;
+import co.istad.codeadvisor.notification.feature.notification.NotificationRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +26,13 @@ public class NotificationConsumer {
     private final NotificationRepository notificationRepository;
     private final SimpMessagingTemplate simpMessagingTemplate;
 
+
+    /**
+     * Listens to the Kafka topics and handles the incoming messages.
+     *
+     * @param message the incoming message
+     * @param topic   the topic from which the message was received
+     */
     @KafkaListener(topics = {
             "${kafka.topic.comment-created}",
             "${kafka.topic.comment-replied}",
@@ -87,11 +94,16 @@ public class NotificationConsumer {
                 default -> log.warn("Unknown topic: {}", topic);
             }
         } catch (JsonProcessingException e) {
-            log.error("Error processing message from topic {}: {}", topic, message, e);
             throw new RuntimeException("Message processing failed", e);
         }
     }
 
+
+    /**
+     * Handles the event when a comment is created.
+     *
+     * @param event the event containing the details of the created comment
+     */
     private void handleCommentCreated(CommentCreatedEvent event) {
         Notification notification = buildNotification(
                 event.getUserId(),
@@ -102,6 +114,11 @@ public class NotificationConsumer {
         saveAndSendNotification(notification);
     }
 
+    /**
+     * Handles the event when a comment is replied to.
+     *
+     * @param event the event containing the details of the reply
+     */
     private void handleCommentReplied(CommentRepliedEvent event) {
         Notification notification = buildNotification(
                 event.getUserId(),
@@ -112,6 +129,12 @@ public class NotificationConsumer {
         saveAndSendNotification(notification);
     }
 
+
+    /**
+     * Handles the event when a content is reacted to.
+     *
+     * @param event the event containing the details of the reaction
+     */
     private void handleContentReacted(ContentReactedEvent event) {
         Notification notification = buildNotification(
                 event.getUserId(),
@@ -122,6 +145,12 @@ public class NotificationConsumer {
         saveAndSendNotification(notification);
     }
 
+
+    /**
+     * Handles the event when a content is reported.
+     *
+     * @param event the event containing the details of the report
+     */
     private void handleContentReported(ContentReportedEvent event) {
         Notification notification = buildNotification(
                 event.getUserId(),
@@ -132,6 +161,11 @@ public class NotificationConsumer {
         saveAndSendNotification(notification);
     }
 
+    /**
+     * Handles the event when a question is created.
+     *
+     * @param event the event containing the details of the created question
+     */
     private void handleQuestionCreated(QuestionCreatedEvent event) {
         Notification notification = buildNotification(
                 event.getUserId(),
@@ -142,6 +176,11 @@ public class NotificationConsumer {
         saveAndSendNotification(notification);
     }
 
+    /**
+     * Handles the event when a question is voted on.
+     *
+     * @param event the event containing the details of the vote
+     */
     private void handleQuestionVoted(QuestionVotedEvent event) {
         Notification notification = buildNotification(
                 event.getUserId(),
@@ -152,6 +191,11 @@ public class NotificationConsumer {
         saveAndSendNotification(notification);
     }
 
+    /**
+     * Handles the event when an answer is created.
+     *
+     * @param event the event containing the details of the created answer
+     */
     private void handleAnswerCreated(AnswerCreatedEvent event) {
         Notification notification = buildNotification(
                 event.getUserId(),
@@ -162,6 +206,11 @@ public class NotificationConsumer {
         saveAndSendNotification(notification);
     }
 
+    /**
+     * Handles the event when an answer is replied to.
+     *
+     * @param event the event containing the details of the reply
+     */
     private void handleAnswerReplied(AnswerRepliedEvent event) {
         Notification notification = buildNotification(
                 event.getUserId(),
@@ -172,6 +221,11 @@ public class NotificationConsumer {
         saveAndSendNotification(notification);
     }
 
+    /**
+     * Handles the event when an answer is voted on.
+     *
+     * @param event the event containing the details of the vote
+     */
     private void handleAnswerVoted(AnswerVotedEvent event) {
         Notification notification = buildNotification(
                 event.getUserId(),
@@ -182,6 +236,11 @@ public class NotificationConsumer {
         saveAndSendNotification(notification);
     }
 
+    /**
+     * Handles the event when an answer is accepted.
+     *
+     * @param event the event containing the details of the accepted answer
+     */
     private void handleAnswerAccepted(AnswerAcceptedEvent event) {
         Notification notification = buildNotification(
                 event.getUserId(),
@@ -192,12 +251,24 @@ public class NotificationConsumer {
         saveAndSendNotification(notification);
     }
 
-    private Notification buildNotification(String senderId, String message,
-                                           NotificationType type, String contentId) {
+    /**
+     * Builds a notification based on the event details.
+     *
+     * @param senderId  the ID of the sender
+     * @param message   the message to be displayed
+     * @param type      the type of the notification
+     * @param contentId the ID of the content
+     * @return the built notification
+     */
+    private Notification buildNotification(String senderId, String message, NotificationType type, String contentId) {
         NotificationData notificationData = new NotificationData();
         notificationData.setUuid(contentId);
 
+        // Logic to determine the receiverId based on content and forum owner, question and answer owner
+//        String receiverId = determineReceiverId(contentId, type);
+
         return Notification.builder()
+                .receiverId("receiverId")
                 .senderId(senderId)
                 .message(message)
                 .notificationType(type)
@@ -207,12 +278,48 @@ public class NotificationConsumer {
                 .build();
     }
 
+    /**
+     * Saves the notification to the repository and sends it to the receiver.
+     *
+     * @param notification the notification to be saved and sent
+     */
     private void saveAndSendNotification(Notification notification) {
         notification = notificationRepository.save(notification);
+        notification.setReceiverId("receiver");
         simpMessagingTemplate.convertAndSend(
                 "/topic/notifications/" + notification.getReceiverId(),
                 notification
         );
-        log.info("Notification saved and sent: {}", notification);
     }
+
+//    private String determineReceiverId(String contentId, NotificationType type) {
+//        // Fetch the content details from the repository or service
+//        Content content = contentRepository.findById(contentId).orElseThrow(() -> new RuntimeException("Content not found"));
+//
+//        String receiverId;
+//        switch (type) {
+//            case COMMENT:
+//            case REPLY:
+//            case REPORT:
+//            case LIKE:
+//                // For comments, replies, reports, and likes, the receiver is the content owner
+//                receiverId = content.getOwnerId();
+//                break;
+//            case QUESTION:
+//            case VOTE:
+//                // For questions and votes, the receiver is the forum owner
+//                receiverId = content.getForumOwnerId();
+//                break;
+//            case ANSWER:
+//            case ACCEPT:
+//                // For answers and accepted answers, the receiver is the question owner
+//                receiverId = content.getQuestionOwnerId();
+//                break;
+//            default:
+//                throw new IllegalArgumentException("Unknown notification type: " + type);
+//        }
+//
+//        return receiverId;
+//    }
+
 }

@@ -1,4 +1,4 @@
-package co.istad.codeadvisor.notification.dto;
+package co.istad.codeadvisor.notification.feature.notification.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

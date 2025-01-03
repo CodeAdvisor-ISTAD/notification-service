@@ -1,9 +1,7 @@
-package co.istad.codeadvisor.notification.service.impl;
+package co.istad.codeadvisor.notification.feature.notification;
 
 
 import co.istad.codeadvisor.notification.domain.Notification;
-import co.istad.codeadvisor.notification.repository.NotificationRepository;
-import co.istad.codeadvisor.notification.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
