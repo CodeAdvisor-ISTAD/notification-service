@@ -9,6 +9,11 @@ spring:
     config:
       uri: http://167.172.78.79:8888
 
+content-service:
+  url: http://content-service:8080
+forum-service:
+  url: http://forum-service:8080
+
 kafka:
   topic:
     comment-created: comment-created-events-topic

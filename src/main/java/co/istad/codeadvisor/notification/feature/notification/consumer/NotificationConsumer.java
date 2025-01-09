@@ -1,5 +1,7 @@
 package co.istad.codeadvisor.notification.feature.notification.consumer;
 
+import co.istad.codeadvisor.notification.client.ContentServiceClient;
+import co.istad.codeadvisor.notification.client.ForumServiceClient;
 import co.istad.codeadvisor.notification.domain.Notification;
 import co.istad.codeadvisor.notification.domain.NotificationData;
 import co.istad.codeadvisor.notification.domain.NotificationType;
@@ -25,6 +27,8 @@ public class NotificationConsumer {
     private final ObjectMapper objectMapper;
     private final NotificationRepository notificationRepository;
     private final SimpMessagingTemplate simpMessagingTemplate;
+    private final ContentServiceClient contentServiceClient;
+    private final ForumServiceClient forumServiceClient;
 
 
     /**
@@ -291,35 +295,5 @@ public class NotificationConsumer {
                 notification
         );
     }
-
-//    private String determineReceiverId(String contentId, NotificationType type) {
-//        // Fetch the content details from the repository or service
-//        Content content = contentRepository.findById(contentId).orElseThrow(() -> new RuntimeException("Content not found"));
-//
-//        String receiverId;
-//        switch (type) {
-//            case COMMENT:
-//            case REPLY:
-//            case REPORT:
-//            case LIKE:
-//                // For comments, replies, reports, and likes, the receiver is the content owner
-//                receiverId = content.getOwnerId();
-//                break;
-//            case QUESTION:
-//            case VOTE:
-//                // For questions and votes, the receiver is the forum owner
-//                receiverId = content.getForumOwnerId();
-//                break;
-//            case ANSWER:
-//            case ACCEPT:
-//                // For answers and accepted answers, the receiver is the question owner
-//                receiverId = content.getQuestionOwnerId();
-//                break;
-//            default:
-//                throw new IllegalArgumentException("Unknown notification type: " + type);
-//        }
-//
-//        return receiverId;
-//    }
 
 }
