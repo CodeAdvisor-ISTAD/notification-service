@@ -16,6 +16,9 @@ forum-service:
 
 kafka:
   topic:
+
+    # content
+
     comment-created: comment-created-events-topic
     comment-replied: comment-replied-events-topic
     comment-reported: comment-reported-events-topic
@@ -31,3 +34,6 @@ kafka:
     answer-voted: answer-voted-events-topic
     answer-accepted: answer-accepted-events-topic
 
+    # forum
+    forum-created: forum-created-events-topic
+    forum-answer-created: forum-answer-created-events-topic

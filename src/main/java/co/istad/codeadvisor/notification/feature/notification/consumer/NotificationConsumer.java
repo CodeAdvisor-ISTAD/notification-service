@@ -1,12 +1,12 @@
 package co.istad.codeadvisor.notification.feature.notification.consumer;
 
-import co.istad.codeadvisor.notification.client.ContentServiceClient;
-import co.istad.codeadvisor.notification.client.ForumServiceClient;
 import co.istad.codeadvisor.notification.domain.Notification;
 import co.istad.codeadvisor.notification.domain.NotificationData;
 import co.istad.codeadvisor.notification.domain.NotificationType;
-import co.istad.codeadvisor.notification.feature.notification.dto.*;
 import co.istad.codeadvisor.notification.feature.notification.NotificationRepository;
+import co.istad.codeadvisor.notification.feature.notification.dto.content.*;
+import co.istad.codeadvisor.notification.feature.notification.dto.forum.ForumAnswerCreatedEvent;
+import co.istad.codeadvisor.notification.feature.notification.dto.forum.ForumCreatedEvent;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -27,8 +27,6 @@ public class NotificationConsumer {
     private final ObjectMapper objectMapper;
     private final NotificationRepository notificationRepository;
     private final SimpMessagingTemplate simpMessagingTemplate;
-    private final ContentServiceClient contentServiceClient;
-    private final ForumServiceClient forumServiceClient;
 
 
     /**
@@ -38,6 +36,8 @@ public class NotificationConsumer {
      * @param topic   the topic from which the message was received
      */
     @KafkaListener(topics = {
+
+            // content
             "${kafka.topic.comment-created}",
             "${kafka.topic.comment-replied}",
             "${kafka.topic.comment-reported}",
@@ -49,7 +49,12 @@ public class NotificationConsumer {
             "${kafka.topic.answer-created}",
             "${kafka.topic.answer-replied}",
             "${kafka.topic.answer-voted}",
-            "${kafka.topic.answer-accepted}"
+            "${kafka.topic.answer-accepted}",
+
+            // forum
+            "${kafka.topic.forum-created}",
+            "${kafka.topic.forum-answer-created}"
+
     }, groupId = "notification-group")
     public void handleMessage(@Payload String message,
                               @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
@@ -95,6 +100,10 @@ public class NotificationConsumer {
                     AnswerAcceptedEvent event = objectMapper.readValue(message, AnswerAcceptedEvent.class);
                     handleAnswerAccepted(event);
                 }
+                case "forum-created-events-topic" -> {
+                    ForumCreatedEvent event = objectMapper.readValue(message, ForumCreatedEvent.class);
+                    handleForumCreated(event);
+                }
                 default -> log.warn("Unknown topic: {}", topic);
             }
         } catch (JsonProcessingException e) {
@@ -113,9 +122,12 @@ public class NotificationConsumer {
                 event.getUserId(),
                 event.getBody(),
                 NotificationType.COMMENT,
-                event.getContentId()
+                event.getContentId(),
+                event.getOwnerId(),
+                event.getSlug()
         );
         saveAndSendNotification(notification);
+        System.out.println("Notification Data: " + notification);
     }
 
     /**
@@ -128,7 +140,9 @@ public class NotificationConsumer {
                 event.getUserId(),
                 "Replied to your comment",
                 NotificationType.REPLY,
-                event.getContentId()
+                event.getContentId(),
+                event.getOwnerId(),
+                event.getSlug()
         );
         saveAndSendNotification(notification);
     }
@@ -144,7 +158,9 @@ public class NotificationConsumer {
                 event.getUserId(),
                 "Reacted with " + event.getReactionType(),
                 NotificationType.LIKE,
-                event.getContentId()
+                event.getContentId(),
+                event.getOwnerId(),
+                event.getSlug()
         );
         saveAndSendNotification(notification);
     }
@@ -160,7 +176,9 @@ public class NotificationConsumer {
                 event.getUserId(),
                 "Reported your content",
                 NotificationType.REPORT,
-                event.getContentId()
+                event.getContentId(),
+                event.getOwnerId(),
+                event.getSlug()
         );
         saveAndSendNotification(notification);
     }
@@ -175,7 +193,9 @@ public class NotificationConsumer {
                 event.getUserId(),
                 "Created a new question",
                 NotificationType.QUESTION,
-                event.getContentId()
+                event.getContentId(),
+                event.getOwnerId(),
+                event.getSlug()
         );
         saveAndSendNotification(notification);
     }
@@ -190,7 +210,9 @@ public class NotificationConsumer {
                 event.getUserId(),
                 "Voted on your question",
                 NotificationType.VOTE,
-                event.getContentId()
+                event.getContentId(),
+                event.getOwnerId(),
+                event.getSlug()
         );
         saveAndSendNotification(notification);
     }
@@ -205,7 +227,9 @@ public class NotificationConsumer {
                 event.getUserId(),
                 "Created a new answer",
                 NotificationType.ANSWER,
-                event.getContentId()
+                event.getContentId(),
+                event.getOwnerId(),
+                event.getSlug()
         );
         saveAndSendNotification(notification);
     }
@@ -220,7 +244,9 @@ public class NotificationConsumer {
                 event.getUserId(),
                 "Replied to your answer",
                 NotificationType.REPLY,
-                event.getContentId()
+                event.getContentId(),
+                event.getOwnerId(),
+                event.getSlug()
         );
         saveAndSendNotification(notification);
     }
@@ -235,7 +261,9 @@ public class NotificationConsumer {
                 event.getUserId(),
                 "Voted on your answer",
                 NotificationType.VOTE,
-                event.getContentId()
+                event.getContentId(),
+                event.getOwnerId(),
+                event.getSlug()
         );
         saveAndSendNotification(notification);
     }
@@ -250,10 +278,42 @@ public class NotificationConsumer {
                 event.getUserId(),
                 "Accepted your answer",
                 NotificationType.ACCEPT,
-                event.getContentId()
+                event.getContentId(),
+                event.getOwnerId(),
+                event.getSlug()
         );
         saveAndSendNotification(notification);
     }
+
+
+//    Forum events
+    public void handleForumCreated(ForumCreatedEvent event) {
+        Notification notification = buildNotification(
+
+                event.getAuthorUuid(),
+                "Created a new forum",
+                NotificationType.CREATE,
+                event.getUuid(),
+                event.getAuthorUuid(),
+                event.getSlug()
+
+        );
+        saveAndSendNotification(notification);
+    }
+
+    public void handleForumAnswerCreated(ForumAnswerCreatedEvent event) {
+        Notification notification = buildNotification(
+
+                event.getAnswerOwnerUuid(),
+                "Answered your forum",
+                NotificationType.ANSWER,
+                event.getQuestionOwnerUuid(),
+                event.getAnswerOwnerUuid(),
+                event.getForumSlug()
+        );
+        saveAndSendNotification(notification);
+    }
+
 
     /**
      * Builds a notification based on the event details.
@@ -264,15 +324,13 @@ public class NotificationConsumer {
      * @param contentId the ID of the content
      * @return the built notification
      */
-    private Notification buildNotification(String senderId, String message, NotificationType type, String contentId) {
+    private Notification buildNotification(String senderId, String message, NotificationType type, String contentId, String ownerId, String slug) {
         NotificationData notificationData = new NotificationData();
         notificationData.setUuid(contentId);
-
-        // Logic to determine the receiverId based on content and forum owner, question and answer owner
-//        String receiverId = determineReceiverId(contentId, type);
+        notificationData.setSlug(slug);
 
         return Notification.builder()
-                .receiverId("receiverId")
+                .receiverId(ownerId)
                 .senderId(senderId)
                 .message(message)
                 .notificationType(type)
@@ -288,8 +346,8 @@ public class NotificationConsumer {
      * @param notification the notification to be saved and sent
      */
     private void saveAndSendNotification(Notification notification) {
+
         notification = notificationRepository.save(notification);
-        notification.setReceiverId("receiverId");
         simpMessagingTemplate.convertAndSend(
                 "/topic/notifications/" + notification.getReceiverId(),
                 notification

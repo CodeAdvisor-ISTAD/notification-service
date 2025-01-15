@@ -27,6 +27,15 @@ public class NotificationServiceImpl implements NotificationService {
         notificationRepository.save(notification);
     }
 
+    @Override
+    public void markAllNotificationsAsRead(String userId) {
+        List<Notification> notifications = notificationRepository.findAllByReceiverId(userId);
+        notifications.forEach(notification -> {
+            notification.setRead(true);
+            notificationRepository.save(notification);
+        });
+    }
+
 
     @Override
     public void removeNotification(String notificationId) {

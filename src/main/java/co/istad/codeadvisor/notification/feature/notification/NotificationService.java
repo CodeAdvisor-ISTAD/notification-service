@@ -23,6 +23,13 @@ public interface NotificationService {
     void markNotificationAsRead(String notificationId, Boolean read);
 
     /**
+     * Marks all notifications for a specific user as read.
+     *
+     * @param userId the ID of the user whose notifications are to be marked as read
+     */
+    void markAllNotificationsAsRead(String userId);
+
+    /**
      * Removes a notification from the system.
      *
      * @param notificationId the ID of the notification to be removed

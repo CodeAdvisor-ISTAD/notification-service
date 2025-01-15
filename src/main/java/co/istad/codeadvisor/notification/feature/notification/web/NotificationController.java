@@ -27,6 +27,11 @@ public class NotificationController {
         notificationService.markNotificationAsRead(notificationId, read);
     }
 
+    @PutMapping("/{userId}/mark-all-read")
+    public void updateAllNotificationsStatus(@PathVariable String userId) {
+        notificationService.markAllNotificationsAsRead(userId);
+    }
+
     @DeleteMapping("/{notificationId}")
     public void removeNotification(@PathVariable String notificationId) {
         notificationService.removeNotification(notificationId);
