@@ -9,12 +9,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ForumCreatedEvent {
-    private String uuid;
-    private String slug;
-    private String authorUuid;
-    private String title;
+public class ForumCommentCreatedEvent {
+    private String questionOwnerUuid;
+    private String answerOwnerUuid;
     private String description;
-    private String introduction;
-    private String expectedAnswers;
+    private String forumSlug;
 }

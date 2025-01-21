@@ -10,6 +10,7 @@ import lombok.Setter;
 public class ContentReportedEvent {
     String contentId;
     String type;
+    String body;
     String userId;
     String ownerId;
     String slug;

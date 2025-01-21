@@ -9,24 +9,18 @@ spring:
     config:
       uri: http://167.172.78.79:8888
 
-content-service:
-  url: http://content-service:8080
-forum-service:
-  url: http://forum-service:8080
-
 kafka:
   topic:
 
-    # content
-
+    # content service
     comment-created: comment-created-events-topic
     comment-replied: comment-replied-events-topic
     comment-reported: comment-reported-events-topic
-
     content-reacted: content-reacted-events-topic
     content-reported: content-reported-events-topic
-    content-created: content-created-events-topic
 
+    # other services
+    content-created: content-created-events-topic
     question-created: question-created-events-topic
     question-voted: question-voted-events-topic
     answer-created: answer-created-events-topic
@@ -34,6 +28,6 @@ kafka:
     answer-voted: answer-voted-events-topic
     answer-accepted: answer-accepted-events-topic
 
-    # forum
-    forum-created: forum-created-events-topic
+    # forum service
+    forum-comment-created: forum-comment-created-events-topic
     forum-answer-created: forum-answer-created-events-topic

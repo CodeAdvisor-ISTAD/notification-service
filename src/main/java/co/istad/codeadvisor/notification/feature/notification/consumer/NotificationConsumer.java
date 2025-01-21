@@ -6,7 +6,7 @@ import co.istad.codeadvisor.notification.domain.NotificationType;
 import co.istad.codeadvisor.notification.feature.notification.NotificationRepository;
 import co.istad.codeadvisor.notification.feature.notification.dto.content.*;
 import co.istad.codeadvisor.notification.feature.notification.dto.forum.ForumAnswerCreatedEvent;
-import co.istad.codeadvisor.notification.feature.notification.dto.forum.ForumCreatedEvent;
+import co.istad.codeadvisor.notification.feature.notification.dto.forum.ForumCommentCreatedEvent;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -52,7 +52,7 @@ public class NotificationConsumer {
             "${kafka.topic.answer-accepted}",
 
             // forum
-            "${kafka.topic.forum-created}",
+            "${kafka.topic.forum-comment-created}",
             "${kafka.topic.forum-answer-created}"
 
     }, groupId = "notification-group")
@@ -100,10 +100,15 @@ public class NotificationConsumer {
                     AnswerAcceptedEvent event = objectMapper.readValue(message, AnswerAcceptedEvent.class);
                     handleAnswerAccepted(event);
                 }
-                case "forum-created-events-topic" -> {
-                    ForumCreatedEvent event = objectMapper.readValue(message, ForumCreatedEvent.class);
-                    handleForumCreated(event);
+                case "forum-comment-created-events-topic" -> {
+                    ForumCommentCreatedEvent event = objectMapper.readValue(message, ForumCommentCreatedEvent.class);
+                    handleForumCommentCreated(event);
                 }
+                case "forum-answer-created-events-topic" -> {
+                    ForumAnswerCreatedEvent event = objectMapper.readValue(message, ForumAnswerCreatedEvent.class);
+                    handleForumAnswerCreated(event);
+                }
+
                 default -> log.warn("Unknown topic: {}", topic);
             }
         } catch (JsonProcessingException e) {
@@ -120,14 +125,21 @@ public class NotificationConsumer {
     private void handleCommentCreated(CommentCreatedEvent event) {
         Notification notification = buildNotification(
                 event.getUserId(),
-                event.getBody(),
+                "Commented on your content",
                 NotificationType.COMMENT,
                 event.getContentId(),
                 event.getOwnerId(),
                 event.getSlug()
         );
+        NotificationData notificationData = new NotificationData();
+        notificationData.setSlug(event.getSlug());
+        notificationData.setIsContent(true);
+        notificationData.setTitle(event.getBody());
+        notification.setNotificationData(notificationData);
         saveAndSendNotification(notification);
-        System.out.println("Notification Data: " + notification);
+
+
+        System.out.println("Notification sent: " + notification);
     }
 
     /**
@@ -144,6 +156,11 @@ public class NotificationConsumer {
                 event.getOwnerId(),
                 event.getSlug()
         );
+        NotificationData notificationData = new NotificationData();
+        notificationData.setIsContent(true);
+        notificationData.setSlug(event.getSlug());
+        notificationData.setTitle(event.getBody());
+        notification.setNotificationData(notificationData);
         saveAndSendNotification(notification);
     }
 
@@ -162,6 +179,10 @@ public class NotificationConsumer {
                 event.getOwnerId(),
                 event.getSlug()
         );
+        NotificationData notificationData = new NotificationData();
+        notificationData.setIsContent(true);
+        notificationData.setSlug(event.getSlug());
+        notification.setNotificationData(notificationData);
         saveAndSendNotification(notification);
     }
 
@@ -180,6 +201,11 @@ public class NotificationConsumer {
                 event.getOwnerId(),
                 event.getSlug()
         );
+        NotificationData notificationData = new NotificationData();
+        notificationData.setIsContent(true);
+        notificationData.setSlug(event.getSlug());
+        notificationData.setTitle(event.getBody());
+        notification.setNotificationData(notificationData);
         saveAndSendNotification(notification);
     }
 
@@ -197,6 +223,11 @@ public class NotificationConsumer {
                 event.getOwnerId(),
                 event.getSlug()
         );
+        NotificationData notificationData = new NotificationData();
+        notificationData.setIsContent(true);
+        notificationData.setSlug(event.getSlug());
+        notificationData.setTitle(event.getBody());
+        notification.setNotificationData(notificationData);
         saveAndSendNotification(notification);
     }
 
@@ -214,6 +245,11 @@ public class NotificationConsumer {
                 event.getOwnerId(),
                 event.getSlug()
         );
+        NotificationData notificationData = new NotificationData();
+        notificationData.setIsContent(true);
+        notificationData.setSlug(event.getSlug());
+        notificationData.setTitle(event.getBody());
+        notification.setNotificationData(notificationData);
         saveAndSendNotification(notification);
     }
 
@@ -231,6 +267,11 @@ public class NotificationConsumer {
                 event.getOwnerId(),
                 event.getSlug()
         );
+        NotificationData notificationData = new NotificationData();
+        notificationData.setIsContent(true);
+        notificationData.setSlug(event.getSlug());
+        notificationData.setTitle(event.getBody());
+        notification.setNotificationData(notificationData);
         saveAndSendNotification(notification);
     }
 
@@ -248,6 +289,11 @@ public class NotificationConsumer {
                 event.getOwnerId(),
                 event.getSlug()
         );
+        NotificationData notificationData = new NotificationData();
+        notificationData.setIsContent(true);
+        notificationData.setSlug(event.getSlug());
+        notificationData.setTitle(event.getBody());
+        notification.setNotificationData(notificationData);
         saveAndSendNotification(notification);
     }
 
@@ -265,6 +311,11 @@ public class NotificationConsumer {
                 event.getOwnerId(),
                 event.getSlug()
         );
+        NotificationData notificationData = new NotificationData();
+        notificationData.setIsContent(true);
+        notificationData.setSlug(event.getSlug());
+        notificationData.setTitle(event.getBody());
+        notification.setNotificationData(notificationData);
         saveAndSendNotification(notification);
     }
 
@@ -282,22 +333,30 @@ public class NotificationConsumer {
                 event.getOwnerId(),
                 event.getSlug()
         );
+        NotificationData notificationData = new NotificationData();
+        notificationData.setIsContent(true);
+        notificationData.setSlug(event.getSlug());
+        notificationData.setTitle(event.getBody());
+        notification.setNotificationData(notificationData);
         saveAndSendNotification(notification);
     }
 
 
 //    Forum events
-    public void handleForumCreated(ForumCreatedEvent event) {
+    public void handleForumCommentCreated(ForumCommentCreatedEvent event) {
         Notification notification = buildNotification(
 
-                event.getAuthorUuid(),
-                "Created a new forum",
-                NotificationType.CREATE,
-                event.getUuid(),
-                event.getAuthorUuid(),
-                event.getSlug()
-
+                event.getAnswerOwnerUuid(),
+                "Commented on your forum",
+                NotificationType.COMMENT,
+                event.getQuestionOwnerUuid(),
+                event.getQuestionOwnerUuid(),
+                event.getForumSlug()
         );
+        NotificationData notificationData = new NotificationData();
+        notificationData.setIsContent(false);
+        notificationData.setSlug(event.getForumSlug());
+        notification.setNotificationData(notificationData);
         saveAndSendNotification(notification);
     }
 
@@ -308,9 +367,13 @@ public class NotificationConsumer {
                 "Answered your forum",
                 NotificationType.ANSWER,
                 event.getQuestionOwnerUuid(),
-                event.getAnswerOwnerUuid(),
+                event.getQuestionOwnerUuid(),
                 event.getForumSlug()
         );
+        NotificationData notificationData = new NotificationData();
+        notificationData.setIsContent(false);
+        notificationData.setSlug(event.getForumSlug());
+        notification.setNotificationData(notificationData);
         saveAndSendNotification(notification);
     }
 

@@ -12,6 +12,7 @@ import lombok.ToString;
 public class CommentRepliedEvent {
     String userId;
     String type;
+    String body;
     String contentId;
     String ownerId;
     String slug;

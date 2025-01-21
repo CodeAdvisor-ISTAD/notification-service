@@ -4,7 +4,7 @@ import lombok.*;
 
 @Getter
 @Setter
-//@Builder
+@ToString
 @NoArgsConstructor
 public class NotificationData {
     private String uuid;
