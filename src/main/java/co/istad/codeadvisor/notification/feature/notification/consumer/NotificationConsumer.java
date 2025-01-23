@@ -104,7 +104,7 @@ public class NotificationConsumer {
                     ForumCommentCreatedEvent event = objectMapper.readValue(message, ForumCommentCreatedEvent.class);
                     handleForumCommentCreated(event);
                 }
-                case "forum-answer-created-events-topic" -> {
+                case "forum-reply-created-events-topic" -> {
                     ForumAnswerCreatedEvent event = objectMapper.readValue(message, ForumAnswerCreatedEvent.class);
                     handleForumAnswerCreated(event);
                 }
@@ -363,11 +363,11 @@ public class NotificationConsumer {
     public void handleForumAnswerCreated(ForumAnswerCreatedEvent event) {
         Notification notification = buildNotification(
 
-                event.getAnswerOwnerUuid(),
+                event.getQuestionOwnerUuid(),
                 "Answered your forum",
                 NotificationType.ANSWER,
-                event.getQuestionOwnerUuid(),
-                event.getQuestionOwnerUuid(),
+                event.getAnswerOwnerUuid(),
+                event.getAnswerOwnerUuid(),
                 event.getForumSlug()
         );
         NotificationData notificationData = new NotificationData();

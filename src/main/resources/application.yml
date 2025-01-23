@@ -2,7 +2,7 @@ spring:
   application:
     name: notification-service
   profiles:
-    active: prod
+    active: dev
   config:
     import: "configserver:"
   cloud:
@@ -30,4 +30,4 @@ kafka:
 
     # forum service
     forum-comment-created: forum-comment-created-events-topic
-    forum-answer-created: forum-answer-created-events-topic
+    forum-answer-created: forum-reply-created-events-topic
