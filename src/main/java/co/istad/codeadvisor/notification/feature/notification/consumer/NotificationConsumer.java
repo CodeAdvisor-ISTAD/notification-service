@@ -52,8 +52,8 @@ public class NotificationConsumer {
             "${kafka.topic.answer-accepted}",
 
             // forum
-            "${kafka.topic.forum-comment-created}",
-            "${kafka.topic.forum-answer-created}"
+            "${kafka.topic.forum-answer-created}",
+            "${kafka.topic.forum-reply-created}"
 
     }, groupId = "notification-group")
     public void handleMessage(@Payload String message,
@@ -100,7 +100,7 @@ public class NotificationConsumer {
                     AnswerAcceptedEvent event = objectMapper.readValue(message, AnswerAcceptedEvent.class);
                     handleAnswerAccepted(event);
                 }
-                case "forum-comment-created-events-topic" -> {
+                case "forum-answer-created-events-topic" -> {
                     ForumCommentCreatedEvent event = objectMapper.readValue(message, ForumCommentCreatedEvent.class);
                     handleForumCommentCreated(event);
                 }
@@ -323,7 +323,7 @@ public class NotificationConsumer {
      * Handles the event when an answer is accepted.
      *
      * @param event the event containing the details of the accepted answer
-     */
+     */ 
     private void handleAnswerAccepted(AnswerAcceptedEvent event) {
         Notification notification = buildNotification(
                 event.getUserId(),

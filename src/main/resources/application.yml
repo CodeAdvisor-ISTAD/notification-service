@@ -29,5 +29,5 @@ kafka:
     answer-accepted: answer-accepted-events-topic
 
     # forum service
-    forum-comment-created: forum-comment-created-events-topic
-    forum-answer-created: forum-reply-created-events-topic
+    forum-answer-created: forum-answer-created-events-topic
+    forum-reply-created: forum-reply-created-events-topic
